@@ -3,3 +3,5 @@
 members = [
     "day_1",
 ]
+
+resolver = "2"
