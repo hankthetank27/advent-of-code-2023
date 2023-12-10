@@ -11,7 +11,7 @@ trait ProcessLine {
 
 impl ProcessLine for Chars<'_> {
     fn filter_nums(self) -> usize {
-        let nums = self.filter(|char| char.is_digit(10)).collect::<Vec<char>>();
+        let nums: Vec<char> = self.filter(|char| char.is_digit(10)).collect();
 
         let first = nums.first().unwrap_or(&'0');
         let last = nums.last().unwrap_or(&'0');
@@ -25,7 +25,7 @@ impl ProcessLine for Chars<'_> {
         return self
             .enumerate()
             .fold(String::new(), |mut digits, (i, char)| {
-                let substring = line.chars().skip(i).collect::<String>();
+                let substring: String = line.chars().skip(i).collect();
                 let digit_word = SPELLED
                     .iter()
                     .enumerate()
