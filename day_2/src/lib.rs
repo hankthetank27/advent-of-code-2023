@@ -15,13 +15,10 @@ pub fn part_1(input: &str) -> usize {
 
 pub fn part_2(input: &str) -> usize {
     return parse_games(input).iter().fold(0, |sum, game| {
-        let max_cube = game.iter().fold(CubeSet::new(), |mut max_cube, cube| {
-            max_cube.red = cmp::max(cube.red, max_cube.red);
-            max_cube.blue = cmp::max(cube.blue, max_cube.blue);
-            max_cube.green = cmp::max(cube.green, max_cube.green);
-            return max_cube;
-        });
-        return sum + (max_cube.red * max_cube.blue * max_cube.green);
+        let max_cubes = game
+            .iter()
+            .fold(CubeSet::new(), |acc_cubes, set| acc_cubes.to_maxes(&set));
+        return sum + (max_cubes.red * max_cubes.blue * max_cubes.green);
     });
 }
 
@@ -44,6 +41,13 @@ impl CubeSet {
     fn is_valid(&self) -> bool {
         self.red <= 12 && self.green <= 13 && self.blue <= 14
     }
+
+    fn to_maxes(mut self, other: &CubeSet) -> Self {
+        self.red = cmp::max(other.red, self.red);
+        self.blue = cmp::max(other.blue, self.blue);
+        self.green = cmp::max(other.green, self.green);
+        self
+    }
 }
 
 fn parse_games(games: &str) -> Vec<Vec<CubeSet>> {
@@ -51,27 +55,26 @@ fn parse_games(games: &str) -> Vec<Vec<CubeSet>> {
         .lines()
         .map(|game| {
             let sets = game.split_once(':').unwrap().1;
-            return sets
-                .split(";")
-                .map(|set| {
-                    return set.split(',').fold(CubeSet::new(), |mut cube_set, cube| {
-                        let mut cube_iter = cube.split_whitespace();
-                        let num = cube_iter.next().unwrap().parse::<usize>().unwrap();
-                        let color = cube_iter.next().unwrap();
-
-                        match color {
-                            "red" => cube_set.red = num,
-                            "green" => cube_set.green = num,
-                            "blue" => cube_set.blue = num,
-                            _ => unreachable!(),
-                        };
-
-                        return cube_set;
-                    });
-                })
-                .collect::<Vec<CubeSet>>();
+            return sets.split(";").map(|set| parse_cube_set(set)).collect();
         })
-        .collect::<Vec<Vec<CubeSet>>>();
+        .collect();
+}
+
+fn parse_cube_set(set: &str) -> CubeSet {
+    return set.split(',').fold(CubeSet::new(), |mut cube_set, cube| {
+        let mut iter_cube = cube.split_whitespace();
+        let num = iter_cube.next().unwrap().parse::<usize>().unwrap();
+        let color = iter_cube.next().unwrap();
+
+        match color {
+            "red" => cube_set.red = num,
+            "green" => cube_set.green = num,
+            "blue" => cube_set.blue = num,
+            _ => unreachable!(),
+        };
+
+        return cube_set;
+    });
 }
 
 #[cfg(test)]
