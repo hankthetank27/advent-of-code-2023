@@ -41,8 +41,8 @@ impl Card {
             if memo.contains_key(&card_num) {
                 matches += memo.get(&card_num).unwrap();
             } else {
-                let res = rest[card_num].find_next(&rest, memo);
-                matches += *memo.entry(card_num).or_insert(res);
+                let sum = rest[card_num].find_next(&rest, memo);
+                matches += *memo.entry(card_num).or_insert(sum);
             }
         }
 
@@ -54,7 +54,8 @@ fn parse_cards(input: &str) -> Vec<Card> {
     return input
         .lines()
         .enumerate()
-        .fold(Vec::new(), |mut cards, (card_num, line)| {
+        .map(|(card_num, line)| {
+            let line = line.split_once(":").unwrap().1;
             let (winning_nums, my_nums) = line.split_once("|").unwrap();
 
             let my_nums_map = my_nums
@@ -65,21 +66,17 @@ fn parse_cards(input: &str) -> Vec<Card> {
                 });
 
             let winning_nums = winning_nums
-                .split_once(":")
-                .unwrap()
-                .1
                 .split_whitespace()
                 .map(|num| num.parse::<usize>().unwrap())
                 .collect::<Vec<usize>>();
 
-            cards.push(Card {
+            return Card {
                 card_num,
                 winning_nums,
                 my_nums_map,
-            });
-
-            return cards;
-        });
+            };
+        })
+        .collect();
 }
 
 #[cfg(test)]
