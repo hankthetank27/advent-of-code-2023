@@ -1,11 +1,11 @@
-use std::{collections::HashMap, usize};
+use std::collections::HashMap;
 
 pub fn part_1(input: &str) -> usize {
     let symbol_map = map_symbols(input);
     return input.lines().enumerate().fold(0, |sum, (i, line)| {
         sum + find_nums(line)
             .iter()
-            .filter(|num| !num.find_adjacent_symbols(i, &symbol_map).is_empty())
+            .filter(|num| !num.adjacent_symbols(i, &symbol_map).is_empty())
             .map(|part_num| part_num.val)
             .sum::<usize>()
     });
@@ -18,7 +18,7 @@ pub fn part_2(input: &str) -> usize {
         .enumerate()
         .fold(HashMap::new(), |mut map, (i, line)| {
             for num in find_nums(line).iter() {
-                let adjacent = num.find_adjacent_symbols(i, &symbol_map);
+                let adjacent = num.adjacent_symbols(i, &symbol_map);
                 for &pos in adjacent.iter() {
                     if symbol_map.get(&pos) == Some(&'*') {
                         map.entry(pos).or_insert(Vec::new()).push(num.val);
@@ -28,19 +28,19 @@ pub fn part_2(input: &str) -> usize {
             return map;
         })
         .iter()
-        .filter(|(_, nums)| nums.len() == 2)
-        .map(|(_, nums)| nums.iter().product::<usize>())
+        .filter(|(_, part_nums)| part_nums.len() == 2)
+        .map(|(_, part_nums)| part_nums.iter().product::<usize>())
         .sum();
 }
 
-struct NumMatch {
+struct PartNum {
     val: usize,
     start: usize,
     end: usize,
 }
 
-impl NumMatch {
-    fn find_adjacent_symbols(
+impl PartNum {
+    fn adjacent_symbols(
         &self,
         line: usize,
         symbols: &HashMap<(usize, usize), char>,
@@ -48,9 +48,8 @@ impl NumMatch {
         let mut adjacent = vec![];
         for i in line.saturating_sub(1)..=line + 1 {
             for j in self.start.saturating_sub(1)..=self.end + 1 {
-                match symbols.get(&(i, j)) {
-                    Some(_) => adjacent.push((i, j)),
-                    None => (),
+                if symbols.get(&(i, j)).is_some() {
+                    adjacent.push((i, j))
                 };
             }
         }
@@ -70,7 +69,7 @@ fn map_symbols(input: &str) -> HashMap<(usize, usize), char> {
     return symbol_map;
 }
 
-fn find_nums(input: &str) -> Vec<NumMatch> {
+fn find_nums(input: &str) -> Vec<PartNum> {
     let mut res = vec![];
     let mut num = String::new();
     let mut left = 0;
@@ -80,7 +79,7 @@ fn find_nums(input: &str) -> Vec<NumMatch> {
             num.push(char);
         } else {
             if !num.is_empty() {
-                res.push(NumMatch {
+                res.push(PartNum {
                     val: num.parse::<usize>().unwrap(),
                     start: left,
                     end: num.len() + left - 1,
@@ -92,7 +91,7 @@ fn find_nums(input: &str) -> Vec<NumMatch> {
     }
 
     if !num.is_empty() {
-        res.push(NumMatch {
+        res.push(PartNum {
             val: num.parse::<usize>().unwrap(),
             start: left,
             end: num.len() + left - 1,
