@@ -1,7 +1,4 @@
-use std::{
-    collections::{HashMap, HashSet},
-    usize,
-};
+use std::collections::{HashMap, HashSet};
 
 pub fn part_1(input: &str) -> usize {
     return parse_cards(input)
@@ -48,6 +45,7 @@ impl Card {
                 matches += *memo.entry(card_num).or_insert(res);
             }
         }
+
         return matches;
     }
 }
@@ -56,7 +54,7 @@ fn parse_cards(input: &str) -> Vec<Card> {
     return input
         .lines()
         .enumerate()
-        .fold(Vec::new(), |mut cards, (i, line)| {
+        .fold(Vec::new(), |mut cards, (card_num, line)| {
             let (winning_nums, my_nums) = line.split_once("|").unwrap();
 
             let my_nums_map = my_nums
@@ -75,7 +73,7 @@ fn parse_cards(input: &str) -> Vec<Card> {
                 .collect::<Vec<usize>>();
 
             cards.push(Card {
-                card_num: i,
+                card_num,
                 winning_nums,
                 my_nums_map,
             });
@@ -88,11 +86,11 @@ fn parse_cards(input: &str) -> Vec<Card> {
 mod test {
     use super::*;
 
-    // #[test]
-    // fn test01() {
-    //     let input = include_str!("../input_example_1.txt");
-    //     assert_eq!(part_1(input), 13);
-    // }
+    #[test]
+    fn test01() {
+        let input = include_str!("../input_example_1.txt");
+        assert_eq!(part_1(input), 13);
+    }
 
     #[test]
     fn test02() {
