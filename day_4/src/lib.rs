@@ -30,23 +30,24 @@ struct Card {
 
 impl Card {
     fn find_next(&self, rest: &Vec<Card>, memo: &mut HashMap<usize, usize>) -> usize {
-        let mut matches = self
+        let matches = self
             .winning_nums
             .iter()
             .filter(|num| self.my_nums_map.get(num).is_some())
             .collect::<Vec<&usize>>()
             .len();
 
-        for card_num in self.card_num + 1..=matches + self.card_num {
-            if memo.contains_key(&card_num) {
-                matches += memo.get(&card_num).unwrap();
-            } else {
-                let sum = rest[card_num].find_next(&rest, memo);
-                matches += *memo.entry(card_num).or_insert(sum);
-            }
-        }
-
-        return matches;
+        return matches
+            + (self.card_num + 1..=self.card_num + matches)
+                .map(|card_num| {
+                    if memo.contains_key(&card_num) {
+                        return *memo.get(&card_num).unwrap();
+                    } else {
+                        let sum = rest[card_num].find_next(rest, memo);
+                        return *memo.entry(card_num).or_insert(sum);
+                    }
+                })
+                .sum::<usize>();
     }
 }
 
